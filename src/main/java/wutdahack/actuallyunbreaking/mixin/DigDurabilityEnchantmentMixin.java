@@ -1,11 +1,10 @@
 package wutdahack.actuallyunbreaking.mixin;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.DigDurabilityEnchantment;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.MendingEnchantment;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,8 +17,8 @@ import wutdahack.actuallyunbreaking.ActuallyUnbreaking;
 public abstract class DigDurabilityEnchantmentMixin extends Enchantment {
 
 
-    private DigDurabilityEnchantmentMixin(Rarity rarity, EnchantmentCategory enchantmentCategory, EquipmentSlot[] equipmentSlots) {
-        super(rarity, enchantmentCategory, equipmentSlots);
+    private DigDurabilityEnchantmentMixin(Enchantment.EnchantmentDefinition definition) {
+        super(definition);
     }
 
     @Override
@@ -33,16 +32,16 @@ public abstract class DigDurabilityEnchantmentMixin extends Enchantment {
 
     }
 
-    @Inject(method = "canEnchant", at = @At(value = "HEAD"), cancellable = true)
-    private void dontAcceptUnbreakableItems(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-
+    @Override
+    public boolean canEnchant(ItemStack stack) {
         if (ActuallyUnbreaking.instance.config.useUnbreakableTag) {
-            cir.setReturnValue(stack.getTag() != null && !stack.getTag().getBoolean("Unbreakable")); // item can't have unbreaking if it has the unbreaking tag as that's also redundant
+            return stack.has(DataComponents.UNBREAKABLE); // item is only acceptable if it doesn't have the unbreakable tag
+        } else {
+            return super.canEnchant(stack);
         }
-
     }
 
-    @Inject(method = "shouldIgnoreDurabilityDrop", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "shouldIgnoreDurabilityDrop(Lnet/minecraft/world/ItemStack;ILnet/minecraft/util/RandomSource;)Z", at = @At(value = "HEAD"), cancellable = true)
     private static void makeUnbreakable(ItemStack stack, int level, RandomSource random, CallbackInfoReturnable<Boolean> cir) {
 
         if (!ActuallyUnbreaking.instance.config.useUnbreakableTag) {
