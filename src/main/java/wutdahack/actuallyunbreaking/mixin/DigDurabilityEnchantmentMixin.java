@@ -35,13 +35,13 @@ public abstract class DigDurabilityEnchantmentMixin extends Enchantment {
     @Override
     public boolean canEnchant(ItemStack stack) {
         if (ActuallyUnbreaking.instance.config.useUnbreakableTag) {
-            return stack.has(DataComponents.UNBREAKABLE); // item is only acceptable if it doesn't have the unbreakable tag
+            return !stack.has(DataComponents.UNBREAKABLE); // item is only acceptable if it doesn't have the unbreakable tag
         } else {
             return super.canEnchant(stack);
         }
     }
 
-    @Inject(method = "shouldIgnoreDurabilityDrop(Lnet/minecraft/world/ItemStack;ILnet/minecraft/util/RandomSource;)Z", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "shouldIgnoreDurabilityDrop", at = @At(value = "HEAD"), cancellable = true)
     private static void makeUnbreakable(ItemStack stack, int level, RandomSource random, CallbackInfoReturnable<Boolean> cir) {
 
         if (!ActuallyUnbreaking.instance.config.useUnbreakableTag) {

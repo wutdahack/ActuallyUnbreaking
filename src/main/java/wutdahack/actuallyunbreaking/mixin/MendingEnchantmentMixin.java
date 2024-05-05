@@ -17,7 +17,7 @@ public abstract class MendingEnchantmentMixin extends Enchantment {
     @Override
     public boolean canEnchant(ItemStack stack) {
         if (ActuallyUnbreaking.instance.config.useUnbreakableTag) {
-            return stack.has(DataComponents.UNBREAKABLE); // item is only acceptable if it doesn't have the unbreakable tag
+            return !stack.has(DataComponents.UNBREAKABLE); // item is only acceptable if it doesn't have the unbreakable tag
         } else {
             return super.canEnchant(stack);
         }
